@@ -26,9 +26,11 @@ def retiraLinks(html):
 
 	return links, ''.join(nomeEmpresa)
 
-def retiraInfo(html):
+def retiraInfo(html, nomeEmpresa):
 
 
+	r  =[(a.end()) for a in list(re.finditer("<div class=\"col-md-10 col-sm-12\"> <h1 class=\"ng-binding\">", html))] #<div class="col-md-10 col-sm-12"> <h1 class="ng-binding">
+	titulo = parseIt(r, html, "<")
 	r = [(a.end()) for a in list(re.finditer("ID: ", html))] ### primeiro irei pegar o id
 	idReclamacao = parseIt(r, html, "<")
 	r = [(a.end()) for a in list(re.finditer("<ul class=\"local-date list-inline\"> <li class=\"ng-binding\"><img src=\"../../../images/pin-maps.52fa5ca3.png\" height=\"14\" width=\"10\">", html))] ###pegando o local <ul class="local-date list-inline"> <li class="ng-binding"><img src="../../../images/pin-maps.52fa5ca3.png" height="14" width="10">
@@ -39,6 +41,17 @@ def retiraInfo(html):
 	topicosAssociados = parseIt(r, html, "\"")
 	r = [(a.end()) for a in list(re.finditer("<p ng-bind-html=\"reading.complains.description|textModerateDecorator\" class=\"ng-binding\">", html))] #pegando a reclamação <p ng-bind-html="reading.complains.description|textModerateDecorator" class="ng-binding">
 	reclamacao = parseIt(r, html, "</p>")
+
+	reclamacao = reclamacao.replace("\n", " ")
+	reclamacao = reclamacao.replace('\t', " ")
+	t = " "
+	for i in topicosAssociados:
+		t = i + t + " "
+
+	arq = open("reclameAqui.txt", "a")
+	arq.write(idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n')
+	arq.close()
+	
 
 	#### O que foi dito pelo consumidor, o local onde ele está,  se foi respondida ou não, se foi qual a resposta
 	#### o que ele falou, data e hora de postagem, tópicos associados aquela postagem
@@ -81,6 +94,3 @@ def parseIt(posicoes, html, final):
 
 	return retornos
 
-arq = open("teste.txt", "r")
-html = arq.read()
-retiraInfo(html)

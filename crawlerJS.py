@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 import unicodedata
 import re
 import parser 
+import requests
 ### crawler para a página do reclame aqui para disciplina de mineração de dados
 
 
@@ -14,6 +15,7 @@ if __name__ == "__main__":
 	idsEmpresas = ["4421", "1492", "7712", "2852"]
 	page =  1
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
+
 	driver = webdriver.Chrome()
 	for idEmpresa in idsEmpresas:
 
@@ -29,7 +31,7 @@ if __name__ == "__main__":
 				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
 				driver.get(montaLink)
 				html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-				parser.retiraInfo(html)
+				parser.retiraInfo(html, nomeEmpresa)
 				#driver.close()
 				exit()
 
