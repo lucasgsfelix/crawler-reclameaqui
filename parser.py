@@ -44,11 +44,17 @@ def retiraInfo(html, nomeEmpresa):
 
 	reclamacao = reclamacao.replace("\n", " ")
 	reclamacao = reclamacao.replace('\t', " ")
+
+
+
 	t = " "
 	for i in topicosAssociados:
 		t = i + t + " "
 
 	arq = open("reclameAqui.txt", "a")
+
+
+	
 	arq.write(idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n')
 	arq.close()
 	
@@ -67,8 +73,12 @@ def parseIt(posicoes, html, final):
 			while html[p] != final:
 				ret.append(html[p])
 				p=p+1
-
-			retornos.append(''.join(ret))
+			ret = ''.join(ret)
+			try:
+				ret = unicode(ret, 'utf-8')
+				retornos.append(ret)
+			except:
+				retornos.append(ret)
 	else:
 		p = posicoes[0]
 		r = [(a.start()) for a in list(re.finditer("</p>", html))]
@@ -87,10 +97,15 @@ def parseIt(posicoes, html, final):
 				retornos.append(html[p])
 
 			p=p+1
-
 		retornos = ''.join(retornos)
+		try:
+			retornos = unicode(retornos, 'utf-8') #### retornando a reclamação
+		except:
+			pass
 
 
+	if len(retornos)==0:
+		return retornos.append('None')
 
-	return retornos
-
+	else:
+		return retornos

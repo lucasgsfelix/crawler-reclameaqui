@@ -16,10 +16,10 @@ if __name__ == "__main__":
 	page =  1
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
 
-	driver = webdriver.Chrome()
+	driver = webdriver.Firefox()
 	for idEmpresa in idsEmpresas:
 
-		while(1):
+		while(page<1000):
 
 			driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
 			html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
