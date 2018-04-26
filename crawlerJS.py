@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	page =  1
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
 
-	driver = webdriver.Firefox()
+	driver = webdriver.Chrome()
 	for idEmpresa in idsEmpresas:
 
 		while(page<1000):
@@ -32,12 +32,10 @@ if __name__ == "__main__":
 				driver.get(montaLink)
 				html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 				parser.retiraInfo(html, nomeEmpresa)
-				#driver.close()
-				exit()
 
 				
 
-
+			print page
 			page = page + 1
 
 

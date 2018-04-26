@@ -26,6 +26,46 @@ def retiraLinks(html):
 
 	return links, ''.join(nomeEmpresa)
 
+def retiraRepetidos(topicos):
+
+	if len(topicos)>1:
+		for i in range(1, len(topicos)):
+			if topicos[i] == topicos[i-1]:
+				topicos.pop(i)
+				if len(topicos)>=i:
+					break
+				
+
+
+	return topicos
+
+
+
+def trataTopicosAssociados(topicosAssociados):
+
+	for i in range(0, len(topicosAssociados)):
+		topicosAssociados[i] = list(topicosAssociados[i])
+
+	for i in range(0, len(topicosAssociados)):
+
+		topicosAssociados[i].pop(0)
+		topicosAssociados[i].pop(0)
+		topicosAssociados[i].pop(0)
+
+	for i in range(0, len(topicosAssociados)):
+
+		topicosAssociados[i] = ''.join(topicosAssociados[i])
+
+	topicosAssociados = sorted(topicosAssociados)
+	#### agora irei retirar os elementos repetidos
+	topicosAssociados = retiraRepetidos(topicosAssociados)
+
+	t = " "
+	for i in topicosAssociados:
+		t = " " +  i + t 
+
+	return t
+
 def retiraInfo(html, nomeEmpresa):
 
 
@@ -46,16 +86,19 @@ def retiraInfo(html, nomeEmpresa):
 	reclamacao = reclamacao.replace('\t', " ")
 
 
-
-	t = " "
-	for i in topicosAssociados:
-		t = i + t + " "
+	if topicosAssociados != None:
+		t = trataTopicosAssociados(topicosAssociados)
+	else:
+		t = " "
+	
 
 	arq = open("reclameAqui.txt", "a")
 
 
 	
-	arq.write(idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n')
+	info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
+
+	arq.write(u''.join(info).encode('utf-8'))
 	arq.close()
 	
 
@@ -74,11 +117,9 @@ def parseIt(posicoes, html, final):
 				ret.append(html[p])
 				p=p+1
 			ret = ''.join(ret)
-			try:
-				ret = unicode(ret, 'utf-8')
-				retornos.append(ret)
-			except:
-				retornos.append(ret)
+			
+			retornos.append(ret)
+		
 	else:
 		p = posicoes[0]
 		r = [(a.start()) for a in list(re.finditer("</p>", html))]
@@ -98,10 +139,10 @@ def parseIt(posicoes, html, final):
 
 			p=p+1
 		retornos = ''.join(retornos)
-		try:
-			retornos = unicode(retornos, 'utf-8') #### retornando a reclamação
-		except:
-			pass
+
+	
+		#retornos = unicode(retornos, 'utf-8') #### retornando a reclamação
+	
 
 
 	if len(retornos)==0:
