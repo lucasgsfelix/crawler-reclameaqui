@@ -13,11 +13,13 @@ import requests
 if __name__ == "__main__":
 
 	idsEmpresas = ["4421", "1492", "7712", "2852"]
-	page =  1
+
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
 
 	driver = webdriver.Chrome()
 	for idEmpresa in idsEmpresas:
+
+		page = 1
 
 		while(page<1000):
 
@@ -29,6 +31,7 @@ if __name__ == "__main__":
 			for i in range(0, len(links)):
 				#https://www.reclameaqui.com.br/vivo-celular-fixo-internet-tv/vivo-sem-fibra_VLyoNXl_8gkiMgi8/
 				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
+				print montaLink
 				driver.get(montaLink)
 				html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 				parser.retiraInfo(html, nomeEmpresa)

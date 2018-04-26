@@ -80,7 +80,12 @@ def retiraInfo(html, nomeEmpresa):
 	r = [(a.end()) for a in list(re.finditer("/busca/", html))] ### pegando tópicos associados
 	topicosAssociados = parseIt(r, html, "\"")
 	r = [(a.end()) for a in list(re.finditer("<p ng-bind-html=\"reading.complains.description|textModerateDecorator\" class=\"ng-binding\">", html))] #pegando a reclamação <p ng-bind-html="reading.complains.description|textModerateDecorator" class="ng-binding">
+	if len(r)==0:
+		print "erro"
+		return 
 	reclamacao = parseIt(r, html, "</p>")
+
+
 
 	reclamacao = reclamacao.replace("\n", " ")
 	reclamacao = reclamacao.replace('\t', " ")
@@ -100,7 +105,7 @@ def retiraInfo(html, nomeEmpresa):
 
 	arq.write(u''.join(info).encode('utf-8'))
 	arq.close()
-	
+		
 
 	#### O que foi dito pelo consumidor, o local onde ele está,  se foi respondida ou não, se foi qual a resposta
 	#### o que ele falou, data e hora de postagem, tópicos associados aquela postagem
