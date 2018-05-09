@@ -7,6 +7,13 @@ import parser
 import requests
 ### crawler para a página do reclame aqui para disciplina de mineração de dados
 
+def pegaLinks(page, idEmpresa):
+
+	driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
+	html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+	links, nomeEmpresa = parser.retiraLinks(html)
+
+	return links, nomeEmpresa
 
 
 
@@ -21,12 +28,12 @@ if __name__ == "__main__":
 
 		page = 1
 
-		while(page<1000):
+		while(page<10):
 
-			driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
-			html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-			links, nomeEmpresa = parser.retiraLinks(html)
-			#driver.close()
+			links = []
+			while len(links) == 0:
+
+				links, nomeEmpresa = pegaLinks(page, idEmpresa)
 	
 			for i in range(0, len(links)):
 				#https://www.reclameaqui.com.br/vivo-celular-fixo-internet-tv/vivo-sem-fibra_VLyoNXl_8gkiMgi8/
