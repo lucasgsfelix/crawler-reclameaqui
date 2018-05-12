@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
 		page = 1
 
-		while(page<10):
+		while(page<100):
 
 			links = []
 			while len(links) == 0:
@@ -36,16 +36,17 @@ if __name__ == "__main__":
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
 	
 			for i in range(0, len(links)):
-				#https://www.reclameaqui.com.br/vivo-celular-fixo-internet-tv/vivo-sem-fibra_VLyoNXl_8gkiMgi8/
+				
 				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
-				print montaLink
 				driver.get(montaLink)
-				html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-				parser.retiraInfo(html, nomeEmpresa)
+				print montaLink
+				try:
+					html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+					parser.retiraInfo(html, nomeEmpresa)
+				except:
+					print "Page Erro ! Link: " + montaLink
 
 				
-
-			print page
 			page = page + 1
 
 
