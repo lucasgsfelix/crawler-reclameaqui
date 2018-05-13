@@ -38,13 +38,14 @@ if __name__ == "__main__":
 			for i in range(0, len(links)):
 				
 				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
-				driver.get(montaLink)
 				print montaLink
 				try:
+					driver.get(montaLink)
 					html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 					parser.retiraInfo(html, nomeEmpresa)
 				except:
 					print "Page Erro ! Link: " + montaLink
+				
 
 				
 			page = page + 1
@@ -55,5 +56,3 @@ if __name__ == "__main__":
 	arq.write(html)
 	#print(p_element.text)
 
-
-#phantomjs save_page.js https://www.reclameaqui.com.br/empresa/oi-movel-fixo-tv/ > page.html
