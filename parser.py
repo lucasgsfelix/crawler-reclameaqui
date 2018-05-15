@@ -100,11 +100,13 @@ def retiraInfo(html, nomeEmpresa):
 	arq = open("reclameAqui.txt", "a")
 
 
+	try:
+		info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
+		arq.write(u''.join(info).encode('utf-8'))
+		arq.close()
+	except:
+		return
 	
-	info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
-
-	arq.write(u''.join(info).encode('utf-8'))
-	arq.close()
 		
 
 	#### O que foi dito pelo consumidor, o local onde ele está,  se foi respondida ou não, se foi qual a resposta
