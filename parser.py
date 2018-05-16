@@ -6,25 +6,28 @@ import unicodedata
 def retiraLinks(html):
 
 	r = [(a.end()) for a in list(re.finditer("href=\"/empresa/", html))]
-	p = r[0]
-	nomeEmpresa = [] #### essa parte vai descobrir o nome da empresa
-	while html[p] != "/":
-		nomeEmpresa.append(html[p])
-		p=p+1
-
-	###################### links para cada pergunta
-	r = [(a.end()) for a in list(re.finditer("href=\"/"+''.join(nomeEmpresa), html))]
-	html = list(html) ### transformando numa lista
-	links = []
-	for posicao in r:
-		p = posicao
-		link = []
-		while html[p] != "\"":
-			link.append(html[p])
+	if len(r)>0:
+		p = r[0]
+		nomeEmpresa = [] #### essa parte vai descobrir o nome da empresa
+		while html[p] != "/":
+			nomeEmpresa.append(html[p])
 			p=p+1
-		links.append(''.join(link))
 
-	return links, ''.join(nomeEmpresa)
+		###################### links para cada pergunta
+		r = [(a.end()) for a in list(re.finditer("href=\"/"+''.join(nomeEmpresa), html))]
+		html = list(html) ### transformando numa lista
+		links = []
+		for posicao in r:
+			p = posicao
+			link = []
+			while html[p] != "\"":
+				link.append(html[p])
+				p=p+1
+			links.append(''.join(link))
+
+		return links, ''.join(nomeEmpresa)
+	
+	return None, None
 
 def retiraRepetidos(topicos):
 

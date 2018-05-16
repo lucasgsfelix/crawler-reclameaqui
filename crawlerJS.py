@@ -13,16 +13,17 @@ def pegaLinks(page, idEmpresa):
 	html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 	links, nomeEmpresa = parser.retiraLinks(html)
 
-	for i in range(0, len(links)):
-		
-		if i>=len(links):
-			break
-		
-		if [(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))] == 0:
-			links.pop(i)
+	if links != None:
+		for i in range(0, len(links)):
+			
+			if i>=len(links):
+				break
+			
+			if [(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))] == 0:
+				links.pop(i)
 
 	return links, nomeEmpresa
-
+	
 
 
 if __name__ == "__main__":
@@ -42,7 +43,10 @@ if __name__ == "__main__":
 			while len(links) == 0:
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
-	
+			
+			if links == None:
+				continue
+
 			for i in range(0, len(links)):
 				
 				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
