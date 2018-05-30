@@ -19,10 +19,12 @@ def pegaLinks(page, idEmpresa):
 			if i>=len(links):
 				break
 			
-			if [(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))] == 0:
+			if len([(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))]) == 0:
 				links.pop(i)
 
 	return links, nomeEmpresa
+
+
 	
 
 
