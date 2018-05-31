@@ -9,20 +9,25 @@ import requests
 
 def pegaLinks(page, idEmpresa):
 
-	driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
-	html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-	links, nomeEmpresa = parser.retiraLinks(html)
+	try:
+		driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
+		html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+		links, nomeEmpresa = parser.retiraLinks(html)
 
-	if links != None:
-		for i in range(0, len(links)):
-			
-			if i>=len(links):
-				break
-			
-			if len([(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))]) == 0:
-				links.pop(i)
+		if links != None:
+			for i in range(0, len(links)):
+				
+				if i>=len(links):
+					break
+				
+				if len([(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))]) == 0:
+					links.pop(i)
 
-	return links, nomeEmpresa
+		return links, nomeEmpresa
+
+	except:
+
+		return None, None
 
 
 	
@@ -46,19 +51,18 @@ if __name__ == "__main__":
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
 			
-			if links == None:
-				continue
-
-			for i in range(0, len(links)):
+			if links != None:
 				
-				montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
-				print montaLink
-				try:
-					driver.get(montaLink)
-					html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-					parser.retiraInfo(html, nomeEmpresa)
-				except:
-					print "Page Erro ! Link: " + montaLink
+				for i in range(0, len(links)):
+					
+					montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
+					print montaLink
+					try:
+						driver.get(montaLink)
+						html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+						parser.retiraInfo(html, nomeEmpresa)
+					except:
+						print "Page Erro ! Link: " + montaLink
 				
 
 				
