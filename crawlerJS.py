@@ -50,6 +50,8 @@ if __name__ == "__main__":
 			while len(links) == 0:
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
+				if links == None:
+					links = []
 			
 			if links != None:
 				
