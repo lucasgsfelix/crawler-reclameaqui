@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
 				if links == None:
-					links = []
+					break
 			
 			if links != None:
 				
