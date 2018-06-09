@@ -14,7 +14,7 @@ def pegaLinks(page, idEmpresa):
 		html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 		links, nomeEmpresa = parser.retiraLinks(html)
 
-		if links != None:
+		if links is not None:
 			for i in range(0, len(links)):
 				
 				if i>=len(links):
@@ -35,8 +35,8 @@ def pegaLinks(page, idEmpresa):
 
 if __name__ == "__main__":
 
-	idsEmpresas = ["4421", "1492", "7712", "2852"]
-
+	#idsEmpresas = ["4421", "1492", "7712", "2852"]
+	idsEmpresas = ['7712']
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
 
 	driver = webdriver.Chrome()
@@ -44,16 +44,15 @@ if __name__ == "__main__":
 
 		page = 1
 
-		while(page<100):
+		while(page<1000):
 
 			links = []
 			while len(links) == 0:
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
-				if links == None:
-					break
+				if links is None: break
 			
-			if links != None:
+			if links is not None and nomeEmpresa is not None:
 				
 				for i in range(0, len(links)):
 					

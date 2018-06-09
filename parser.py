@@ -84,7 +84,7 @@ def retiraInfo(html, nomeEmpresa):
 	topicosAssociados = parseIt(r, html, "\"")
 	r = [(a.end()) for a in list(re.finditer("<p ng-bind-html=\"reading.complains.description|textModerateDecorator\" class=\"ng-binding\">", html))] #pegando a reclamação <p ng-bind-html="reading.complains.description|textModerateDecorator" class="ng-binding">
 	if len(r)==0:
-		print "erro"
+		print "Erro não há dados dá reclamação !"
 		return 
 	reclamacao = parseIt(r, html, "</p>")
 
@@ -94,21 +94,18 @@ def retiraInfo(html, nomeEmpresa):
 	reclamacao = reclamacao.replace('\t', " ")
 
 
-	if topicosAssociados != None:
+	if topicosAssociados is not None:
 		t = trataTopicosAssociados(topicosAssociados)
 	else:
-		t = " "
+		t = "-"
 	
 
-	arq = open("reclameAqui.txt", "a")
+	arq = open("claro.txt", "a")
 
-
-	try:
-		info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
-		arq.write(u''.join(info).encode('utf-8'))
-		arq.close()
-	except:
-		return
+	info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
+	arq.write(u''.join(info).encode('utf-8'))
+	arq.close()
+			
 	
 		
 
@@ -155,8 +152,9 @@ def parseIt(posicoes, html, final):
 	
 
 
-	if len(retornos)==0:
-		return retornos.append('None')
+	if (len(retornos)==0) or (retornos is None):
+		retornos = []
+		return retornos.append('-')
 
 	else:
 		return retornos
