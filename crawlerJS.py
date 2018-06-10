@@ -97,9 +97,6 @@ if __name__ == "__main__":
 				
 			page = page + 1
 
-
 	arq = open("saida.txt", 'w')
 	html = html.encode('utf-8')
 	arq.write(html)
-	#print(p_element.text)
-

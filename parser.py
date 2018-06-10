@@ -13,6 +13,9 @@ def retiraLinks(html):
 			nomeEmpresa.append(html[p])
 			p=p+1
 
+		if len(nomeEmpresa)==0:
+			nomeEmpresa = "semnome"
+
 		###################### links para cada pergunta
 		r = [(a.end()) for a in list(re.finditer("href=\"/"+''.join(nomeEmpresa), html))]
 		html = list(html) ### transformando numa lista
