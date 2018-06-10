@@ -5,6 +5,7 @@ import unicodedata
 import re
 import parser 
 import requests
+import time
 ### crawler para a página do reclame aqui para disciplina de mineração de dados
 
 def pegaLinks(page, idEmpresa):
@@ -14,14 +15,8 @@ def pegaLinks(page, idEmpresa):
 		html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 		links, nomeEmpresa = parser.retiraLinks(html)
 
-		if links is not None:
-			for i in range(0, len(links)):
-				
-				if i>=len(links):
-					break
-				
-				if len([(a.end()) for a in list(re.finditer("https://www.reclameaqui.com.br/"+nomeEmpresa, links[i]))]) == 0:
-					links.pop(i)
+		links = retiraLinksProibidos(links)
+
 
 		return links, nomeEmpresa
 
@@ -29,14 +24,37 @@ def pegaLinks(page, idEmpresa):
 
 		return None, None
 
+def retiraLinksProibidos(links):
+
+	arq = open("Aux/links_proibidos")
+	links_proibidos = arq.read()
+	links_proibidos = links_proibidos.split('\n')
+	arq.close()
+
+	if links is not None:
+		i=0
+		while i<len(links):
+			
+			j=0
+			while j<len(links_proibidos):
+
+				if links[i] == links_proibidos[j]:
+
+					links.pop(i) ## retirando o link proibido
+					i=i-1
+					break
+				
+				j=j+1
+
+			i=i+1
+
+	return links
 
 	
-
-
 if __name__ == "__main__":
 
 	#idsEmpresas = ["4421", "1492", "7712", "2852"]
-	idsEmpresas = ['7712']
+	idsEmpresas = ['2852']
 	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
 	quantidadeTransacoes = 10000
 	flag=0
@@ -44,6 +62,7 @@ if __name__ == "__main__":
 	for idEmpresa in idsEmpresas:
 
 		qt = 0
+		page = 1
 		### fazer flag dos 15 minutos
 		while(qt<quantidadeTransacoes):
 
@@ -52,7 +71,7 @@ if __name__ == "__main__":
 
 				links, nomeEmpresa = pegaLinks(page, idEmpresa)
 				if links is None: break
-			
+
 			if links is not None and nomeEmpresa is not None:
 				
 				for i in range(0, len(links)):
@@ -60,7 +79,12 @@ if __name__ == "__main__":
 					montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
 					print montaLink
 					try:
+						inicio = time.time()
 						driver.get(montaLink)
+						final = time.time()
+						if final - inicio >= 1:	
+							driver.refresh() ### para evitar erros onde não carrega a página
+						
 						html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
 						parser.retiraInfo(html, nomeEmpresa)
 						flag=1

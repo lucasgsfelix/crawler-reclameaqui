@@ -100,7 +100,7 @@ def retiraInfo(html, nomeEmpresa):
 		t = "-"
 	
 
-	arq = open("claro.txt", "a")
+	arq = open("tim.txt", "a")
 
 	info = idReclamacao[0]+'\t'+nomeEmpresa+'\t'+titulo[0]+'\t'+local[0]+'\t'+horario[0]+'\t'+t+'\t'+reclamacao+'\n'
 	arq.write(u''.join(info).encode('utf-8'))
