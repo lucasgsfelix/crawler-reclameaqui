@@ -3,100 +3,83 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unicodedata
 import re
-import parser 
+import parser
 import requests
 import time
-### crawler para a página do reclame aqui para disciplina de mineração de dados
+####################################################
+##
+## Crawler Reclame Aqui
+## Autor: Lucas G. Felix
+## Contribuição: Luiz Angioletti
+##
+####################################################
 
 def pegaLinks(page, idEmpresa):
 
-	try:
-		driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
-		html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-		links, nomeEmpresa = parser.retiraLinks(html)
+    try:
+        driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
+        html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+        links, nomeEmpresa = parser.retiraLinks(html)
+        links = retiraLinksProibidos(links)
+        return links, nomeEmpresa
 
-		links = retiraLinksProibidos(links)
+    except:
+        return None, None
 
-
-		return links, nomeEmpresa
-
-	except:
-
-		return None, None
-
+# Revisar se está realmente retirando os links proibidos
 def retiraLinksProibidos(links):
+    '''Espera uma lista como entrada para iterar contra a lista de links proibidos (arquivo auxiliar'''
 
-	arq = open("Aux/links_proibidos")
-	links_proibidos = arq.read()
-	links_proibidos = links_proibidos.split('\n')
-	arq.close()
+    with open("Aux/links_proibidos", 'r') as f:
+        links_proibidos = f.read().split('/n')
 
-	if links is not None:
-		i=0
-		while i<len(links):
-			
-			j=0
-			while j<len(links_proibidos):
+    if links is not None:
+        for count, item in enumerate(links):
+            if item in links_proibidos:
+                links.pop(count)  # retirando o link proibido
+    return links
 
-				if links[i] == links_proibidos[j]:
-
-					links.pop(i) ## retirando o link proibido
-					i=i-1
-					break
-				
-				j=j+1
-
-			i=i+1
-
-	return links
-
-	
 if __name__ == "__main__":
 
-	#idsEmpresas = ["4421", "1492", "7712", "2852"]
-	idsEmpresas = ['2852']
-	#link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+idEmpresa+"&page="+page+"&size=10&status=ALL"
-	quantidadeTransacoes = 10000
-	flag=0
-	driver = webdriver.Chrome()
-	for idEmpresa in idsEmpresas:
+    #idsEmpresas = ["4421", "1492", "7712", "2852"]
+    idsEmpresas = ['4421']
+    quantidadeTransacoes = 10000
+    flag=0
+    driver = webdriver.Chrome()
+    for idEmpresa in idsEmpresas:
 
-		qt = 0
-		page = 1
-		### fazer flag dos 15 minutos
-		while(qt<quantidadeTransacoes):
+        qt = 0
+        page = 1
+        ### fazer flag dos 15 minutos
+        while(qt<quantidadeTransacoes):
 
-			links = []
-			while len(links) == 0:
+            links = []
+            while len(links) == 0:
 
-				links, nomeEmpresa = pegaLinks(page, idEmpresa)
-				if links is None: break
+                links, nomeEmpresa = pegaLinks(page, idEmpresa)
+                if links is None: break
 
-			if links is not None and nomeEmpresa is not None:
-				
-				for i in range(0, len(links)):
-					
-					montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
-					print montaLink
-					try:
-						inicio = time.time()
-						driver.get(montaLink)
-						final = time.time()
-						if final - inicio >= 1:	
-							driver.refresh() ### para evitar erros onde não carrega a página
-						
-						html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
-						parser.retiraInfo(html, nomeEmpresa)
-						flag=1
-					except:
-						print "Page Erro ! Link: " + montaLink
+            if links is not None and nomeEmpresa is not None:
+                for i in range(0, len(links)):
+                    montaLink = "https://www.reclameaqui.com.br/"+nomeEmpresa+links[i]
+                    print(montaLink)
+                    try:
+                        inicio = time.time()
+                        driver.get(montaLink)
+                        final = time.time()
+                        if final - inicio >= 1:
+                                driver.refresh() ### para evitar erros onde não carrega a página
+                        html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+                        parser.retiraInfo(html, nomeEmpresa)
+                        flag=1
+                    except:
+                        print("Page Erro ! Link: " + montaLink)
 
-					if flag == 1:
-						qt=qt+1
-						flag=0
-				
-			page = page + 1
+                    if flag == 1:
+                        qt=qt+1
+                        flag=0
+            page = page + 1
 
-	arq = open("saida.txt", 'w')
-	html = html.encode('utf-8')
-	arq.write(html)
+    with open('saida.txt', 'w') as f:
+        html = html.encode('utf-8')
+        f.write(html)

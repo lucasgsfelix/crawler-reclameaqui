@@ -1,2 +1,6 @@
 # Arquivo temporário do VIM
 *.swp
+
+# Arquivos gerados pelo programa
+tim.txt
+__pycache__/
