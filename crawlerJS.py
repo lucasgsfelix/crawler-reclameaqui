@@ -38,15 +38,14 @@ def pegaLinks(page, idEmpresa):
 
 # Revisar se está realmente retirando os links proibidos
 def retiraLinksProibidos(links):
-    '''Espera uma lista como entrada para iterar contra a lista de links proibidos (arquivo auxiliar'''
-
-    with open("Aux/links_proibidos", 'r') as f:
-        links_proibidos = f.read().split('/n')
+    '''Retira links que estão listados no arquivo de links proibidos'''
+    with open('Aux/links_proibidos') as f:
+        links_proibidos = f.read().split('\n')
 
     if links is not None:
         for count, item in enumerate(links):
             if item in links_proibidos:
-                links.pop(count)  # retirando o link proibido
+                links.pop(count) ## retirando o link proibido
     return links
 
 if __name__ == "__main__":
