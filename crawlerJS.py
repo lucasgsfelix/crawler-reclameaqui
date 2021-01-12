@@ -6,6 +6,7 @@ import re
 import parser
 import requests
 import time
+import os
 ####################################################
 ##
 ## Crawler Reclame Aqui
@@ -15,12 +16,21 @@ import time
 ####################################################
 
 def pegaLinks(page, idEmpresa):
-
     try:
-        driver.get("https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="+str(idEmpresa)+"&page="+str(page)+"&size=10&status=ALL")
-        html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+        driver.get(
+            "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="
+            +str(idEmpresa)
+            +"&page="
+            +str(page)
+            +"&size=10&status=ALL"
+        )
+
+        html = driver.execute_script(
+                "return document.getElementsByTagName('html')[0].innerHTML"
+               )
         links, nomeEmpresa = parser.retiraLinks(html)
         links = retiraLinksProibidos(links)
+
         return links, nomeEmpresa
 
     except:
