@@ -4,33 +4,41 @@ import re
 import unicodedata
 
 def retiraLinks(html):
+    try:
+        r = [a.end() for a in re.finditer("href=\"/empresa/", html)]
+        if len(r)>0:
+            # essa parte vai descobrir o nome da empresa:
+            # procura-se pela string dentro do finditer acima
+            # se ela for encontrada, armazenda todas as respostas.
+            # o finditer retorna posição de início e de fim da string buscada
+            # utilizamos apenas a de fim, porque queremos o que está após essa
+            # string buscada
+            p = r[0]
+            nomeEmpresa = []
+            # seguimos, abaixo, caracter a caracter até termos o nome
+            # completo da empresa em questão
+            while html[p] != "/":
+                    nomeEmpresa.append(html[p])
+                    p=p+1
 
-	r = [(a.end()) for a in list(re.finditer("href=\"/empresa/", html))]
-	if len(r)>0:
-		p = r[0]
-		nomeEmpresa = [] #### essa parte vai descobrir o nome da empresa
-		while html[p] != "/":
-			nomeEmpresa.append(html[p])
-			p=p+1
+            # ou não há nome para a empresa
+            if len(nomeEmpresa)==0:
+                    nomeEmpresa = "semnome"
 
-		if len(nomeEmpresa)==0:
-			nomeEmpresa = "semnome"
+            # usando a mesma lógica para encontrar os links para cada pergunta
+            r = [a.end() for a in re.finditer("href=\"/"+''.join(nomeEmpresa), html)]
+            links = []
+            for posicao in r:
+                p = posicao
+                link = []
+                while html[p] != "\"":
+                    link.append(html[p])
+                    p=p+1
+                links.append(''.join(link))
 
-		###################### links para cada pergunta
-		r = [(a.end()) for a in list(re.finditer("href=\"/"+''.join(nomeEmpresa), html))]
-		html = list(html) ### transformando numa lista
-		links = []
-		for posicao in r:
-			p = posicao
-			link = []
-			while html[p] != "\"":
-				link.append(html[p])
-				p=p+1
-			links.append(''.join(link))
-
-		return links, ''.join(nomeEmpresa)
-	
-	return None, None
+            return links, ''.join(nomeEmpresa)
+    except:
+        return None, None
 
 def retiraRepetidos(topicos):
 
