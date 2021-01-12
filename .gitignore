@@ -3,4 +3,7 @@
 
 # Arquivos gerados pelo programa
 tim.txt
+reclamacoes.tsv
+
+# Diretórios gerados pelo programa
 __pycache__/
