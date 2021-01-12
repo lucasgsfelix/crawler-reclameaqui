@@ -41,17 +41,13 @@ def retiraLinks(html):
         return None, None
 
 def retiraRepetidos(topicos):
-
-	if len(topicos)>1:
-		for i in range(1, len(topicos)):
-			if topicos[i] == topicos[i-1]:
-				topicos.pop(i)
-				if len(topicos)>=i:
-					break
-				
-
-
-	return topicos
+    if len(topicos)>1:
+        for i in range(1, len(topicos)):
+            if topicos[i] == topicos[i-1]:
+                topicos.pop(i)
+                if len(topicos)>=i:
+                    break
+    return topicos
 
 
 
