@@ -98,7 +98,10 @@ if __name__ == "__main__":
                          if final - inicio >= 1:
                              # para evitar erros onde não carrega a página
                              driver.refresh()
-                             script = "return document.getElementsByTagName('html')[0].innerHTML"
+                             # estratégia para quebrar strings muito longas é
+                             # colocar elas entre parênteses
+                             script = ("return document.getElements"
+                                       "ByTagName('html')[0].innerHTML")
                              html = driver.execute_script(script)
                          time.sleep(1)
                          info = parser.retiraInfo(html, nomeEmpresa)
