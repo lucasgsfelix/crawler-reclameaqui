@@ -1,115 +1,108 @@
 #-*- coding: utf-8 -*-
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-import unicodedata
+
+import os
 import re
-import parser
 import requests
 import time
-import os
-####################################################
-##
-## Crawler Reclame Aqui
-## Autor: Lucas G. Felix
-## Contribuição: Luiz Angioletti
-##
-####################################################
+import unicodedata
 
-def pegaLinks(page, idEmpresa):
-    try:
-        driver.get(
-            "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="
-            +str(idEmpresa)
-            +"&page="
-            +str(page)
-            +"&size=10&status=ALL"
-        )
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 
-        html = driver.execute_script(
-                "return document.getElementsByTagName('html')[0].innerHTML"
-               )
-        links, nomeEmpresa = parser.retiraLinks(html)
-        links = retiraLinksProibidos(links)
+import parser
 
-        return links, nomeEmpresa
+def get_html(link):
 
-    except:
-        return None, None
+    html_return = "return document.getElementsByTagName('html')[0].innerHTML"
 
-# Revisar se está realmente retirando os links proibidos
-def retiraLinksProibidos(links):
+    start_time = time.time()
+
+    driver.get(link)
+
+    final_time = time.time()
+
+    if final_time - start_time >= 1:
+
+        driver.refresh()
+
+    html = driver.execute_script(html_return)
+
+    return html
+
+
+def retrieve_links(page, company_name, forbidden_links):
+
+    company_url = "https://www.reclameaqui.com.br/empresa/" + company_name + "/lista-reclamacoes/?pagina=" + str(page)
+
+    html = get_html(company_url)
+
+    links = parser.get_page_links(company_name, html)
+
+    links = filter_forbidden_links(forbidden_links, links)
+
+    return links, company_name
+
+
+def read_data(file_name):
+
+    with open(file_name, 'r') as file:
+
+        return file.read().split('\n')
+
+
+def filter_forbidden_links(forbidden_links, links):
     '''Retira links que estão listados no arquivo de links proibidos'''
-    with open('Aux/links_proibidos') as f:
-        links_proibidos = f.read().split('\n')
 
     if links is not None:
-        for count, item in enumerate(links):
-            if item in links_proibidos:
-                links.pop(count) ## retirando o link proibido
+
+        return list(filter(lambda link: link not in forbidden_links, links))
+
     return links
+
 
 if __name__ == "__main__":
 
-    # idsEmpresas = ["4421", "1492", "7712", "2852"]
-    Empresas = ['4421']
+    forbidden_links = read_data("Aux/links_proibidos.txt")
 
-    # link = "https://www.reclameaqui.com.br/indices/lista_reclamacoes/?id="
-    #        +idEmpresa
-    #        +"&page="
-    #        +page
-    #        +"&size=10&status=ALL"
-    output_file = 'reclamacoes.tsv'
-    file_header = ['Link','Id_Reclamacao','Nome_Empresa','Titulo_Reclamacao',
-                  'Local_Postagem', 'Horario_Postagem', 'Topicos_Associados',
-                  'Texto_Reclamacao','\n']
-    quantidadeTransacoes = 1
+    ids = ['tim-celular']
+
+    amount_instances = 1
+
+    #chrome_options = Options()
+    #chrome_options.add_argument("--headless")
+
     driver = webdriver.Chrome()
 
-    # testa se o arquivo já existe. Se existir, remove.
-    # Isso é necessário porque a cada vez que o arquivo for aberto daqui pra
-    # frente ele terá apenas conteúdo adicionado
-    if os.path.isfile(output_file):
-        os.remove(output_file)
-
-    # escreve cabeçalho no arquivo de saída
-    with open(output_file, 'w') as f:
-        f.write('\t'.join(file_header))
-
-    for idEmpresa in Empresas:
+    for company_id in ids:
         qt = 0
         page = 1
         ### fazer flag dos 15 minutos
-        while(qt<quantidadeTransacoes):
-            links = []
-            while len(links) == 0:
-                links, nomeEmpresa = pegaLinks(page, idEmpresa)
-                if links is None:
+        while qt < amount_instances:
+
+            while True:
+
+                links, company_name = retrieve_links(page, company_id, forbidden_links)
+
+                if links is None or links:
+
                     break
-            if links is not None and nomeEmpresa is not None:
-                for item in links:
-                     montaLink = "https://www.reclameaqui.com.br/" \
-                                 +nomeEmpresa \
-                                 +item
-                     print(montaLink)
-                     try:
-                         inicio = time.time()
-                         driver.get(montaLink)
-                         final = time.time()
-                         if final - inicio >= 1:
-                             # para evitar erros onde não carrega a página
-                             driver.refresh()
-                             # estratégia para quebrar strings muito longas é
-                             # colocar elas entre parênteses
-                             script = ("return document.getElements"
-                                       "ByTagName('html')[0].innerHTML")
-                             html = driver.execute_script(script)
-                         time.sleep(1)
-                         info = parser.retiraInfo(html, nomeEmpresa)
-                         with open(output_file, 'a') as f:
-                             f.write(montaLink + '\t' + info + '\n')
-                     except:
-                         print( "Page Erro ! Link: " + montaLink)
+
+            if links is not None and company_name is not None:
+
+                complete_links = list(map(lambda link: "https://www.reclameaqui.com.br/" + company_name + link.replace('"', ''), links))
+
+                for link in complete_links:
+
+                    html = get_html(link)
+
+                    time.sleep(1)
+
+                    info = parser.retrieve_complaint_info(html, company_name)
+
+                exit()
 
             qt += 1
             page = page + 1
+        break
     driver.close()

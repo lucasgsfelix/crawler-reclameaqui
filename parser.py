@@ -3,188 +3,103 @@
 import re
 import unicodedata
 
-def retiraLinks(html):
-    try:
-        r = [a.end() for a in re.finditer("href=\"/empresa/", html)]
-        if len(r)>0:
-            # essa parte vai descobrir o nome da empresa:
-            # procura-se pela string dentro do finditer acima
-            # se ela for encontrada, armazenda todas as respostas.
-            # o finditer retorna posição de início e de fim da string buscada
-            # utilizamos apenas a de fim, porque queremos o que está após essa
-            # string buscada
-            p = r[0]
-            nomeEmpresa = []
-            # seguimos, abaixo, caracter a caracter até termos o nome
-            # completo da empresa em questão
-            while html[p] != "/":
-                    nomeEmpresa.append(html[p])
-                    p=p+1
+from bs4 import BeautifulSoup
 
-            # ou não há nome para a empresa
-            if len(nomeEmpresa)==0:
-                    nomeEmpresa = "semnome"
+def get_page_links(company_name, html):
 
-            # usando a mesma lógica para encontrar os links para cada pergunta
-            r = [a.end() for a in re.finditer("href=\"/"+''.join(nomeEmpresa), html)]
-            links = []
-            for posicao in r:
-                p = posicao
-                link = []
-                while html[p] != "\"":
-                    link.append(html[p])
-                    p=p+1
-                links.append(''.join(link))
-
-            return links, ''.join(nomeEmpresa)
-    except:
-        return None, None
-
-def retiraRepetidos(topicos):
-    if len(topicos)>1:
-        for i in range(1, len(topicos)):
-            if topicos[i] == topicos[i-1]:
-                topicos.pop(i)
-                if len(topicos)>=i:
-                    break
-    return topicos
+    return retrieve_multiple_by_tag('href="/' + company_name, "\"", html)
 
 
+def retrieve_complaint_info(html, company_name):
+    """
 
-def trataTopicosAssociados(topicosAssociados):
+        Method resposible for retrieve all the informar needed.
 
-	for i in range(0, len(topicosAssociados)):
-		topicosAssociados[i] = list(topicosAssociados[i])
+        Complain ID
+        User Location
+        Category
+        Product
+        Problem
+        Title
+        User Complain #1
+        Complain Date #1
+        ...
+        User Complain #N
+        Complain Date #N
 
-	for i in range(0, len(topicosAssociados)):
+        Company Answer #1
+        Company Answer Date #1
+        ...
+        Company Answer #N
+        Company Answer Date #N
+    """
 
-		topicosAssociados[i].pop(0)
-		topicosAssociados[i].pop(0)
-		topicosAssociados[i].pop(0)
+    start_position = [a.start() for a in re.finditer("userAgent", html)][0]
 
-	for i in range(0, len(topicosAssociados)):
+    html = html[start_position:]
 
-		topicosAssociados[i] = ''.join(topicosAssociados[i])
+    # where all the data will be stored
+    complain_info = {}
 
-	topicosAssociados = sorted(topicosAssociados)
-	#### agora irei retirar os elementos repetidos
-	topicosAssociados = retiraRepetidos(topicosAssociados)
+    search_tags = {
+                    'Complain ID': ('legacyId":', ','),
+                    'User Location': ('userCity":"' '",'),
+                    "Title": ('title":"', '",'),
+                  }
 
-	t = " "
-	for i in topicosAssociados:
-		t = " " +  i + t 
+    complain_info = retrieve_tokens(search_tags, html, complain_info, retrieve_by_unique_tag)
 
-	return t
+    multiple_tags = {
+                        "Company Answer": ('message":"', '",'),
+                        "Answer Date"
+                        "User Complain": ('description":', '",'),
+                        "Complain Date": ('"marketplaceComplain":*,created":"', '",'),
+                    }
 
-def retiraInfo(html, nomeEmpresa):
-    # pegando o título com o trecho:
-    # <div class="col-md-10 col-sm-12"> <h1 class="ng-binding">
-    r = [a.end() for a in re.finditer(
-               "<div class=\"col-md-10 col-sm-12\"> <h1 class=\"ng-binding\">",
-               html)]
-
-    titulo = parseIt(r, html, "<")
-    # print(titulo)
-
-    # primeiro pegamos o ID
-    r = [a.end() for a in re.finditer("ID: ", html)]
-    idReclamacao = parseIt(r, html, "<")
-    # print(idReclamacao)
-
-    # pegando o local <ul class="local-date list-inline"> \
-    #                 <li class="ng-binding">\
-    #                 <img src="../../../images/pin-maps.52fa5ca3.png" \
-    #                 height="14" width="10">
-    var = "<ul class=\"local-date list-inline\"> <li class=\"ng-binding\"><img src=\"../../../images/pin-maps.52fa5ca3.png\" height=\"14\" \width=\"10\">"
-    r = [a.end() for a in re.finditer(var, html)]
-    local = parseIt(r, html, "<")
-    # print(local)
-
-    # pega o horário e data <li class="ng-binding">\
-    #                       <i class="fa fa-calendar"></i>
-
-    var = "<li class=\"ng-binding\"><i class=\"fa fa-calendar\"></i>"
-    r = [a.end() for a in re.finditer(var, html)]
-    horario = parseIt(r, html, "<")
-    # print(horario)
-
-    # pegando tópicos associados
-    r = [a.end() for a in re.finditer("/busca/", html)]
-    topicosAssociados = parseIt(r, html, "\"")
-    # print(topicosAssociados)
-
-    # pegando a reclamação <p ng-bind-html="reading.complains.\
-    #                      description|textModerateDecorator" \
-    #                      class="ng-binding">
-    var = "<p ng-bind-html=\"reading.complains.description|textModerateDecorator\" class=\"ng-binding\">"
-
-    r = [a.end() for a in re.finditer(var, html)]
-    if len(r)==0:
-        print("Erro não há dados da reclamação !")
-        return
-
-    reclamacao = parseIt(r, html, "</p>")
-    reclamacao = reclamacao.replace("\n", " ")
-    reclamacao = reclamacao.replace('\t', " ")
-
-    # print(reclamacao)
-
-    if topicosAssociados is not None:
-            t = trataTopicosAssociados(topicosAssociados)
-    else:
-            t = "-"
-
-    # O id da reclamação, o nome da empresa, o título da postagem, 
-    # o local onde ele está, o horário em que o post foi feito,
-    # tópicos associadso à postagem (se existirem) e a reclamação de fato
-    info = idReclamacao[0] + '\t' + nomeEmpresa + '\t' + titulo[0] + \
-           '\t' + local[0] + '\t' + horario[0] + '\t' + t + \
-           '\t' + reclamacao
-
-    return info
-
-def parseIt(posicoes, html, final):
-
-	retornos = []
-	if final != "</p>":
-		for i in range(0, len(posicoes)):
-			p = posicoes[i]
-			ret = []
-			while html[p] != final:
-				ret.append(html[p])
-				p=p+1
-			ret = ''.join(ret)
-			
-			retornos.append(ret)
-		
-	else:
-		p = posicoes[0]
-		r = [(a.start()) for a in list(re.finditer("</p>", html))]
-
-		for k in r:
-			if k>p:
-				break
-
-		flag=0
-		while p<k:
-			if html[p]==">":
-				flag=1
-				p=p+1
-
-			if flag==1:
-				retornos.append(html[p])
-
-			p=p+1
-		retornos = ''.join(retornos)
-
-	
-		#retornos = unicode(retornos, 'utf-8') #### retornando a reclamação
-	
+    complain_info = retrieve_tokens(multiple_tags, html, complain_info, retrieve_multiple_by_tag)
 
 
-	if (len(retornos)==0) or (retornos is None):
-		retornos = []
-		return retornos.append('-')
+    return complain_info
 
-	else:
-		return retornos
+
+def retrieve_tokens(tags, html, complain_info, method):
+
+    for key in tags:
+
+        start_tag, end_tag = tags[key].items()
+
+        complain_info[key] = method(start_tag, end_tag, html)
+
+    return complain_info
+
+
+def retrieve_by_unique_tag(start_tag, end_tag, html):
+
+    start_position = [a.end() for a in re.finditer(start_tag, html)]
+
+    if start_position:
+
+        start_position = start_position[0]
+
+        end_position = [a.start() for a in re.finditer(end_tag, html)]
+
+        final_position = list(filter(lambda position: position > start_position, end_position))[0]
+
+        return html[start_position: final_position]
+
+    return None
+
+
+def retrieve_multiple_by_tag(start_tag, end_tag, html):
+
+    start_positions = [a.end() for a in re.finditer(start_tag, html)]
+
+    if start_position:
+
+        end_positions = [a.start() for a in re.finditer(end_tag, html)]
+
+        token_positions = {start: list(filter(lambda position: position > start, end_positions))[0] for start in start_positions}
+
+        return list(map(lambda start, end: html[start: end], token_positions.keys(), token_positions.values()))
+
+    return None
